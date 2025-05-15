@@ -5,7 +5,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Héritage de Spring Boot pour versioning et plugins -->
+    <!-- Parent Spring Boot pour versions et plugin management -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -19,14 +19,50 @@
     <packaging>pom</packaging>
     <name>MeteoPlus Parent POM</name>
 
-    <!-- Liste des modules enfants -->
+    <!-- Déclaration des modules enfants -->
     <modules>
         <module>meteo-service</module>
         <module>stat-service</module>
     </modules>
 
+    <!-- Propriétés communes -->
     <properties>
         <java.version>17</java.version>
+        <spring.boot.version>3.4.5</spring.boot.version>
     </properties>
 
+    <!-- Gestion centralisée des versions des dépendances Spring Boot -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- Plugins communs -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Plugin Spring Boot -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                </plugin>
+                <!-- Plugin Maven Compiler pour Java version -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>
