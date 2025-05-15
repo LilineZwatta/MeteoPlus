@@ -23,4 +23,5 @@ public class MeteoController {
     public Mono<WeatherResponse> getWeather(@RequestParam("city") String city) {
         return meteoService.fetchWeather(city);
     }
+
 }
