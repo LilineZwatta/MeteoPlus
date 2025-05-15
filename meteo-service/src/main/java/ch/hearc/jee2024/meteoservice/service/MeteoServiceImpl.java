@@ -16,14 +16,16 @@ public class MeteoServiceImpl implements MeteoService {
     private final String alertQueue;
 
     public MeteoServiceImpl(
-            WebClient webClient,
+            @Value("${openweather.api.url}") String apiUrl,
             @Value("${openweather.api.key}") String apiKey,
             JmsTemplate jmsTemplate,
             @Value("${app.jms.alert-queue}") String alertQueue) {
-        this.webClient   = webClient;
-        this.apiKey      = apiKey;
+
+        // on crée un WebClient direct avec l'URL
+        this.webClient = WebClient.create(apiUrl);
+        this.apiKey = apiKey;
         this.jmsTemplate = jmsTemplate;
-        this.alertQueue  = alertQueue;
+        this.alertQueue = alertQueue;
     }
 
     @Override
@@ -32,12 +34,13 @@ public class MeteoServiceImpl implements MeteoService {
                 .uri(uri -> uri
                         .queryParam("q", city)
                         .queryParam("appid", apiKey)
+                        .queryParam("units", "metric")      // <— ici !
                         .build())
                 .retrieve()
                 .bodyToMono(WeatherResponse.class)
                 .doOnNext(resp -> {
-                    // détection d’alerte
-                    double tempC = resp.getMain().getTemp() - 273.15;
+                    // maintenant resp.getMain().getTemp() est déjà en °C
+                    double tempC = resp.getMain().getTemp();
                     boolean severe = tempC > 35 ||
                             resp.getWeather().stream()
                                     .anyMatch(w -> w.getDescription().toLowerCase().contains("rain"));
@@ -46,9 +49,9 @@ public class MeteoServiceImpl implements MeteoService {
                     }
                 })
                 .map(resp -> {
-                    // conversion Kelvin -> Celsius
-                    double tempC = resp.getMain().getTemp() - 273.15;
-                    resp.getMain().setTemp(Math.round(tempC * 100.0) / 100.0);
+                    // on arrondit à 1 décimale pour l’affichage
+                    double rounded = Math.round(resp.getMain().getTemp() * 10.0) / 10.0;
+                    resp.getMain().setTemp(rounded);
                     return resp;
                 });
     }
