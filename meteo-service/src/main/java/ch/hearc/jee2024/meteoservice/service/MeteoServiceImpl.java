@@ -1,15 +1,10 @@
 package ch.hearc.jee2024.meteoservice.service;
 
 import ch.hearc.jee2024.meteoservice.model.WeatherResponse;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 @Service
 public class MeteoServiceImpl implements MeteoService {
@@ -21,20 +16,16 @@ public class MeteoServiceImpl implements MeteoService {
     private String apiKey;
 
     private final RestTemplate rest = new RestTemplate();
-    private final JmsTemplate jmsTemplate;
-    private final String alertQueue;
+    private final JmsSender jmsSender;
 
     public MeteoServiceImpl(
             @Value("${API_URL}") String apiUrl,
             @Value("${API_KEY}") String apiKey,
-            JmsTemplate jmsTemplate,
-            @Value("${app.jms.alert-queue}") String alertQueue) {
+            JmsSender jmsSender) {
 
-        // on crée un WebClient direct avec l'URL
         this.apiUrl = apiUrl;
         this.apiKey = apiKey;
-        this.jmsTemplate = jmsTemplate;
-        this.alertQueue = alertQueue;
+        this.jmsSender = jmsSender;
     }
 
     @Override
@@ -45,20 +36,17 @@ public class MeteoServiceImpl implements MeteoService {
                 + "&units=metric";  // °C
 
         try {
-            ResponseEntity<WeatherResponse> resp =
-                    rest.getForEntity(url, WeatherResponse.class);
-
-            WeatherResponse weather = resp.getBody();
+            WeatherResponse weather = rest.getForObject(url, WeatherResponse.class);
             if (weather != null) {
                 // arrondi à 1 décimale
                 double temp = Math.round(weather.getMain().getTemp() * 10.0) / 10.0;
                 weather.getMain().setTemp(temp);
 
                 // envoi d’alerte si extrême
-                if (temp > 35 ||
+                if (temp > 20    ||
                         weather.getWeather().stream()
                                 .anyMatch(w -> w.getDescription().toLowerCase().contains("rain"))) {
-                    jmsTemplate.convertAndSend(alertQueue, weather);
+                    jmsSender.sendAlert(weather);
                 }
             }
             return weather;
