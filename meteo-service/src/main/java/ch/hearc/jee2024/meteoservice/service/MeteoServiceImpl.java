@@ -1,9 +1,13 @@
 package ch.hearc.jee2024.meteoservice.service;
 
 import ch.hearc.jee2024.meteoservice.model.WeatherResponse;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -16,7 +20,7 @@ public class MeteoServiceImpl implements MeteoService {
     @Value("${API_KEY}")
     private String apiKey;
 
-    private final WebClient webClient;
+    private final RestTemplate rest = new RestTemplate();
     private final JmsTemplate jmsTemplate;
     private final String alertQueue;
 
@@ -29,35 +33,39 @@ public class MeteoServiceImpl implements MeteoService {
         // on crée un WebClient direct avec l'URL
         this.apiUrl = apiUrl;
         this.apiKey = apiKey;
-        this.webClient = WebClient.create(apiUrl);
         this.jmsTemplate = jmsTemplate;
         this.alertQueue = alertQueue;
     }
 
     @Override
-    public Mono<WeatherResponse> fetchWeather(String city) {
-        return webClient.get()
-                .uri(uri -> uri
-                        .queryParam("q", city)
-                        .queryParam("appid", apiKey)
-                        .queryParam("units", "metric")  // pour obtenir la température en °C
-                        .build())
-                .retrieve()
-                .bodyToMono(WeatherResponse.class)
-                .doOnNext(resp -> {
-                    double tempC = resp.getMain().getTemp();
-                    boolean severe = tempC > 35 ||
-                            resp.getWeather().stream()
-                                    .anyMatch(w -> w.getDescription().toLowerCase().contains("rain"));
-                    if (severe) {
-                        jmsTemplate.convertAndSend(alertQueue, resp);
-                    }
-                })
-                .map(resp -> {
-                    // Arrondit à 1 décimale pour l’affichage
-                    double rounded = Math.round(resp.getMain().getTemp() * 10.0) / 10.0;
-                    resp.getMain().setTemp(rounded);
-                    return resp;
-                });
+    public WeatherResponse getWeather(String city) {
+        String url = apiUrl
+                + "?q=" + city
+                + "&appid=" + apiKey
+                + "&units=metric";  // °C
+
+        try {
+            ResponseEntity<WeatherResponse> resp =
+                    rest.getForEntity(url, WeatherResponse.class);
+
+            WeatherResponse weather = resp.getBody();
+            if (weather != null) {
+                // arrondi à 1 décimale
+                double temp = Math.round(weather.getMain().getTemp() * 10.0) / 10.0;
+                weather.getMain().setTemp(temp);
+
+                // envoi d’alerte si extrême
+                if (temp > 35 ||
+                        weather.getWeather().stream()
+                                .anyMatch(w -> w.getDescription().toLowerCase().contains("rain"))) {
+                    jmsTemplate.convertAndSend(alertQueue, weather);
+                }
+            }
+            return weather;
+
+        } catch (HttpClientErrorException.NotFound ex) {
+            // ville introuvable → renvoie null, le controller renverra 404
+            return null;
+        }
     }
 }

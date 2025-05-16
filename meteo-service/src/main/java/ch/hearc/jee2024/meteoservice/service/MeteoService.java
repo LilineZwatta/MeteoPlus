@@ -7,5 +7,5 @@ public interface MeteoService {
     /**
      * Récupère la météo actuelle pour la ville passée en paramètre.
      */
-    Mono<WeatherResponse> fetchWeather(String city);
+    WeatherResponse getWeather(String city);
 }
