@@ -26,7 +26,7 @@ public class WeatherResponse {
         return main;
     }
 
-    public List<WeatherInfo> getWeather() {
+        public List<WeatherInfo> getWeather() {
         return weather;
     }
 
