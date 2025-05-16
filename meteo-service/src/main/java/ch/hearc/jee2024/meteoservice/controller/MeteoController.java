@@ -16,6 +16,7 @@ public class MeteoController {
     private final MeteoService meteoService;
 
     public MeteoController(MeteoService meteoService) {
+
         this.meteoService = meteoService;
     }
 
