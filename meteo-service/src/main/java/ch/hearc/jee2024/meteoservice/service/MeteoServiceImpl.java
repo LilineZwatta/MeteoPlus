@@ -9,18 +9,14 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class MeteoServiceImpl implements MeteoService {
 
-    @Value("${API_URL}")
-    private String apiUrl;
-
-    @Value("${API_KEY}")
-    private String apiKey;
-
+    private final String apiUrl;
+    private final String apiKey;
     private final RestTemplate rest = new RestTemplate();
     private final JmsSender jmsSender;
 
     public MeteoServiceImpl(
-            @Value("${API_URL}") String apiUrl,
-            @Value("${API_KEY}") String apiKey,
+            @Value("${openweather.api.url}") String apiUrl,
+            @Value("${openweather.api.key}") String apiKey,
             JmsSender jmsSender) {
 
         this.apiUrl = apiUrl;
@@ -33,27 +29,25 @@ public class MeteoServiceImpl implements MeteoService {
         String url = apiUrl
                 + "?q=" + city
                 + "&appid=" + apiKey
-                + "&units=metric";  // °C
+                + "&units=metric";
 
         try {
             WeatherResponse weather = rest.getForObject(url, WeatherResponse.class);
             if (weather != null) {
-                // arrondi à 1 décimale
                 double temp = Math.round(weather.getMain().getTemp() * 10.0) / 10.0;
                 weather.getMain().setTemp(temp);
 
-                // envoi d’alerte si extrême
-                if (temp > 20    ||
-                        weather.getWeather().stream()
-                                .anyMatch(w -> w.getDescription().toLowerCase().contains("rain"))) {
+                if (temp > 20 || weather.getWeather().stream()
+                        .anyMatch(w -> w.getDescription().toLowerCase().contains("rain"))) {
+                    System.out.println("🔔 Envoi alerte pour " + weather.getCity());
                     jmsSender.sendAlert(weather);
                 }
             }
             return weather;
 
         } catch (HttpClientErrorException.NotFound ex) {
-            // ville introuvable → renvoie null, le controller renverra 404
             return null;
         }
     }
 }
+
