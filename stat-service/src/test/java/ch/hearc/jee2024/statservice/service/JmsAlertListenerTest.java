@@ -5,9 +5,11 @@ import ch.hearc.jee2024.statservice.repository.AlertRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.ComponentScan;
 
 import static org.mockito.Mockito.*;
 
+@ComponentScan("ch.hearc.jee2024.statservice.controller")
 public class JmsAlertListenerTest {
 
     private AlertRepository alertRepository;

@@ -28,7 +28,6 @@ public class JmsAlertListener {
             alert.setTemperature(weather.getMain().getTemp());
             alert.setCondition(weather.getWeather().get(0).getDescription());
             alertRepository.save(alert);
-            System.out.println("Alerte sauvegardée pour " + alert.getCity());
         } catch (Exception e) {
             System.err.println("Erreur réception alerte : " + e.getMessage());
         }

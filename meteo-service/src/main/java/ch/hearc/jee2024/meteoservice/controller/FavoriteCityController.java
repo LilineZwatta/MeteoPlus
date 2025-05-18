@@ -12,7 +12,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/favorites")
+@RequestMapping(value = "/api/favorites", produces = "application/json")
 public class FavoriteCityController {
 
     private final FavoriteCityService service;
@@ -42,7 +42,7 @@ public class FavoriteCityController {
 
     @Operation(summary = "Ajoute une nouvelle ville favorite")
     @ApiResponse(responseCode = "201", description = "Ville favorite ajoutée avec succès")
-    @PostMapping
+    @PostMapping(consumes = "application/json", produces = "application/json")
     public ResponseEntity<FavoriteCity> create(@RequestBody FavoriteCity fav) {
         FavoriteCity saved = service.addFavorite(fav);
         return ResponseEntity

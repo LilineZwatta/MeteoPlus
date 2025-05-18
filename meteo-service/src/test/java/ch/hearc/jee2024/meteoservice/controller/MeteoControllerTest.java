@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -22,9 +23,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = MeteoController.class)
+@WebMvcTest(MeteoController.class)
 @Import(MeteoControllerTest.TestConfig.class)
 @ActiveProfiles("test")
+@ComponentScan("ch.hearc.jee2024.meteoservice.controller")
 public class MeteoControllerTest {
 
     @Configuration
@@ -67,7 +69,7 @@ public class MeteoControllerTest {
 
         mockMvc.perform(get("/api/weather?city=Paris"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.city").value("Paris"));
+                .andExpect(jsonPath("$.name").value("Paris"));
     }
 
     @Test
