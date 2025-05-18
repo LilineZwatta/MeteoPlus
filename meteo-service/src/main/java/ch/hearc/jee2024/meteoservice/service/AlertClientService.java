@@ -11,7 +11,7 @@ import java.util.List;
 public class AlertClientService {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String statServiceUrl = "http://localhost:8081/api/alerts/city/";
+    private final String statServiceUrl = "http://localhost:8081/api/alerts/";
 
     public List<Alert> getAlertsForCity(String city) {
         Alert[] alerts = restTemplate.getForObject(statServiceUrl + city, Alert[].class);

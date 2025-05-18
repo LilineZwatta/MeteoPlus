@@ -22,8 +22,16 @@ public class WeatherResponse {
         return city;
     }
 
+    public void setCity(String city) {
+        this.city = city;
+    }
+
     public TemperatureInfo getMain() {
         return main;
+    }
+
+    public void setMain(TemperatureInfo main) {
+        this.main = main;
     }
 
         public List<WeatherInfo> getWeather() {

@@ -60,7 +60,6 @@
             <version>2.3.0</version>
         </dependency>
 
-
         <!-- tests -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
