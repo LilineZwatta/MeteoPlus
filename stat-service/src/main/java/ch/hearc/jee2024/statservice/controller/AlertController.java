@@ -20,4 +20,9 @@ public class AlertController {
     public List<Alert> getAllAlerts() {
         return alertRepository.findAll();
     }
+
+    @GetMapping("/city/{cityName}")
+    public List<Alert> getAlertsByCity(@PathVariable String cityName) {
+        return alertRepository.findByCityIgnoreCase(cityName);
+    }
 }

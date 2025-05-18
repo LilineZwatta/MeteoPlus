@@ -1,14 +1,14 @@
 package ch.hearc.jee2024.meteoservice.controller;
 
+import ch.hearc.jee2024.meteoservice.model.Alert;
 import ch.hearc.jee2024.meteoservice.model.WeatherResponse;
 import ch.hearc.jee2024.meteoservice.service.MeteoService;
+import ch.hearc.jee2024.meteoservice.service.AlertClientService; // 🔹 N'oublie pas cet import
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -16,10 +16,12 @@ import java.util.Map;
 public class MeteoController {
 
     private final MeteoService meteoService;
+    private final AlertClientService alertClientService; // 🔹 Déclare bien ce champ ici
 
-    public MeteoController(MeteoService meteoService) {
-
+    // 🔹 Injecte le service via le constructeur
+    public MeteoController(MeteoService meteoService, AlertClientService alertClientService) {
         this.meteoService = meteoService;
+        this.alertClientService = alertClientService;
     }
 
     @GetMapping
@@ -28,8 +30,13 @@ public class MeteoController {
         if (resp == null) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", city +" => Ville introuvable" ));
+                    .body(Map.of("message", city + " => Ville introuvable"));
         }
         return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping("/alerts/{city}")
+    public List<Alert> alerts(@PathVariable String city) {
+        return alertClientService.getAlertsForCity(city);
     }
 }
