@@ -24,11 +24,9 @@ public class JwtFilter implements Filter {
             try {
                 SignedJWT jwt = SignedJWT.parse(token);
 
-                // Test : afficher le login (subject)
                 String subject = jwt.getJWTClaimsSet().getSubject();
                 System.out.println("Utilisateur authentifié : " + subject);
 
-                // Tu pourrais vérifier l'expiration ici aussi (facultatif)
 
                 chain.doFilter(request, response);
                 return;
