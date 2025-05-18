@@ -12,7 +12,7 @@ public class JmsConfig {
     @Bean
     public JmsTemplate jmsTemplate(ConnectionFactory connectionFactory) {
         JmsTemplate template = new JmsTemplate(connectionFactory);
-        template.setPubSubDomain(false); // ⬅️ Important : désactive le mode topic
+        template.setPubSubDomain(false); // Désactive le mode topic
         return template;
     }
 }

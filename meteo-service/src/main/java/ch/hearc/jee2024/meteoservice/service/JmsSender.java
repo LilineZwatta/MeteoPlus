@@ -19,17 +19,12 @@ public class JmsSender {
         this.jmsTemplate = jmsTemplate;
         this.objectMapper = objectMapper;
         this.alertQueue = alertQueue;
-
-        System.out.println("📡 JmsSender initialisé avec queue=" + alertQueue);
     }
 
 
     public void sendAlert(WeatherResponse weather) {
         try {
             String json = objectMapper.writeValueAsString(weather);
-            System.out.println("JSON envoyé : " + json);
-            System.out.println("Envoi vers queue : " + alertQueue);
-            System.out.println("Contenu : " + json);
             jmsTemplate.convertAndSend(alertQueue, json);
         } catch (JsonProcessingException e) {
             System.err.println("Erreur de sérialisation : " + e.getMessage());

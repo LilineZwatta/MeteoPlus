@@ -6,14 +6,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication(scanBasePackages = "ch.hearc.jee2024.meteoservice")
 public class MeteoServiceApplication {
     public static void main(String[] args) {
-        System.out.println("Before Start");
         SpringApplication.run(MeteoServiceApplication.class, args);
-        System.out.println("After Start");
     }
 
     @Value("${openweather.api.url}")
@@ -27,9 +25,7 @@ public class MeteoServiceApplication {
     }
 
     @Bean
-    public WebClient webClient(@Value("${openweather.api.url}") String apiUrl) {
-        return WebClient.builder()
-                .baseUrl(apiUrl)
-                .build();
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }

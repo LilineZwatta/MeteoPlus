@@ -20,7 +20,7 @@ public class AlertService {
     }
 
     public List<Alert> getAlertsByCity(String city) {
-        return alertRepository.findByCityIgnoreCase(city); // ✅ Appel correct
+        return alertRepository.findByCityIgnoreCase(city);
     }
 
 }

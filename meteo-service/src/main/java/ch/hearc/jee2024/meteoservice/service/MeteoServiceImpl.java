@@ -39,7 +39,6 @@ public class MeteoServiceImpl implements MeteoService {
 
                 if (temp > 20 || weather.getWeather().stream()
                         .anyMatch(w -> w.getDescription().toLowerCase().contains("rain"))) {
-                    System.out.println("Envoi alerte pour " + weather.getCity());
                     jmsSender.sendAlert(weather);
                 }
             }
